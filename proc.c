@@ -328,8 +328,9 @@ waitx(int *wtime, int *rtime)
   int havekids, pid;
   struct  proc *curproc = myproc();
   acquire(&ptable.lock);
-  while (1 == 1)
+  for(;;)
   {
+    // Scan through table looking for exited children.
     havekids = 0;
     for (process=ptable.proc; process < &ptable.proc[NPROC]; process++)
     {
@@ -338,6 +339,7 @@ waitx(int *wtime, int *rtime)
       havekids = 1;
       if (process->state == ZOMBIE)
       {
+        // Found one
         *wtime = process->etime - process->stime - process->rtime - process->iotime;
         *rtime = process->rtime;
         pid = process->pid;
@@ -353,12 +355,14 @@ waitx(int *wtime, int *rtime)
         return pid;
       }  
     }
+    // No point waiting if we don't have any children.
     if (havekids == 0 || curproc->killed == 1){
       release(&ptable.lock);
       return -1;
     }
-
-    sleep(curproc, &ptable.lock);
+    
+    // Wait for children to exit.  (See wakeup1 call in proc_exit.)
+    sleep(curproc, &ptable.lock); //DOC: wait-sleep
   }
   
 }
