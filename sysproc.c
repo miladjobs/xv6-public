@@ -27,6 +27,20 @@ sys_wait(void)
 }
 
 int
+sys_waitx(void)
+{
+  int *wtime;
+  int *rtime;
+
+  //get argument from user mode function if not get return -1
+  if(argptr(0, (char **)&wtime, sizeof(int)) < 0)
+    return -1;
+  if(argptr(1, (char **)&wtime, sizeof(int)) < 0)
+    return -1;
+  return waitx(wtime, rtime);    
+}
+
+int
 sys_kill(void)
 {
   int pid;
