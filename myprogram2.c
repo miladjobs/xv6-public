@@ -4,52 +4,70 @@
 
 int main(int argc, char *argv[])
 {
-    int pid;
-    int child_pid, wait_time, run_time;
-    int wait_time2, run_time2;
-    int s1,s2;
-    pid = fork();
-    if (pid < 0)
-    {
-        printf(1, "fork faild!\n");
-        exit();
-    }
+    int pid = fork();
     if (pid == 0)
     {
-        pid = fork();
-        if(pid < 0)
+        fork();
+        fork();
+        fork();
+        fork();
+        int pidx = getpid();
+        if (pidx % 8 == 0)
         {
-            printf(1, "fork faild!\n");
-            exit();
+            printf(1, "Initializing process %d, priority : %d\n", pidx, 90);
+            set_priority(pidx, 90);
         }
-        if (pid == 0)
+        else if (pidx % 8 == 1)
         {
-            for (int  i = 0; i < 100000; i++)
-            {
-                i *= 5 + i/20;
-            }
+            printf(1, "Initializing process %d, priority : %d\n", pidx, 70);
+            set_priority(pidx, 70);
         }
-        else{
-            s1 = set_priority(getpid(), 10);
-            for (int  i = 0; i < 100000; i++)
-            {
-                i *= 5 + i/20;
-            }
-            child_pid = waitx(&wait_time2, &run_time2);
-            printf(1, "\n child wait time : %d , Parent RunTime : %d with cildpid : %d and s1 : %d\n", wait_time2, run_time2, child_pid, s1);
+        else if (pidx % 8 == 2)
+        {
+            printf(1, "Initializing process %d, priority : %d\n", pidx, 80);
+            set_priority(pidx, 80);
+        }
+        else if (pidx % 8 == 3)
+        {
+            printf(1, "Initializing process %d, priority : %d\n", pidx, 20);
+            set_priority(pidx, 20);
+        }
+        else if (pidx % 8 == 4)
+        {
+            printf(1, "Initializing process %d, priority : %d\n", pidx, 50);
+            set_priority(pidx, 50);
+        }
+        else if (pidx % 8 == 5)
+        {
+            printf(1, "Initializing process %d, priority : %d\n", pidx, 30);
+            set_priority(pidx, 30);
+        }
+        else if (pidx % 8 == 6)
+        {
+            printf(1, "Initializing process %d, priority : %d\n", pidx, 10);
+            set_priority(pidx, 10);
+        }
+        else
+        {
+            printf(1, "Initializing process %d, priority : %d\n", pidx, 60);
+            set_priority(pidx, 60);
         }
         
+        for (int i = 0; i < getpid() * 100000; i++) //some works
+        {
+            continue;
+        }
+        
+        exit();
     }
     else
     {
-        s2 = set_priority(getpid(), 50);
-        for (int  i = 0; i < 100000; i++)
-        {
-            i *= 5 + i/20;
-        }
-        child_pid = waitx(&wait_time, &run_time);
-        s2 = set_priority(getpid(), 10);
-        printf(1, "\n Parent wait time : %d , Parent RunTime : %d with cildpid : %d and s2 : %d\n", wait_time, run_time, child_pid, s2);
+        sleep(20000);
+        printf(1, "------Running ps-----\n");
+        xps();
+        wait();
+        exit();
     }
-    exit();
+    
+    
 }
