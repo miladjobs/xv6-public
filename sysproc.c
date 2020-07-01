@@ -118,3 +118,8 @@ sys_set_priority(void)
     
   return set_priority(pid, value);    
 }
+
+int
+sys_xps(void){
+  return xps();
+}
