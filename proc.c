@@ -620,3 +620,26 @@ set_priority(int pid, int value){
   release(&ptable.lock);
   return old_priority;
 }
+
+// ps command 
+int
+xps(void){
+  struct proc *p;
+  sti();
+  acquire(&ptable.lock);
+  cprintf("name \t  pid  \t  state  \t priority \n");
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if (p->state == SLEEPING)
+      cprintf("%s \t  %d \t  SLEEPING  \t %d \n");
+    else if(p->state == RUNNING)
+        cprintf("%s \t  %d \t  RUNNING  \t %d \n");
+    else if(p->state == RUNNABLE)
+        cprintf("%s \t  %d \t  RUNNABLE  \t %d \n");
+    else if(p->state == ZOMBIE)
+        cprintf("%s \t  %d \t  ZOMBIE  \t %d \n");        
+  }
+  release(&ptable.lock);
+
+  return 22;
+}
