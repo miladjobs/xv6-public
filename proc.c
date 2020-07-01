@@ -618,5 +618,6 @@ set_priority(int pid, int value){
     }
   }
   release(&ptable.lock);
+  yield();
   return old_priority;
 }
