@@ -123,3 +123,14 @@ int
 sys_xps(void){
   return xps();
 }
+
+int
+sys_nice(void){
+  int pid, priority;
+  if (argptr(0, (char **)&pid, sizeof(int)) < 0)
+    return -1;
+  if (argptr(1, (char **)&priority, sizeof(int)) < 0)
+    return -1; 
+  
+  return nice(pid, priority);
+}
