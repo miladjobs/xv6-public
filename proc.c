@@ -370,10 +370,12 @@ waitx(int *wtime, int *rtime)
   
 }
 
-struct prco* chooseProc() {
+struct proc* chooseProc() {
   int i;
-  int index1, index2, index3;
-  int plevel;
+  int index1 = 0;
+  int index2 = 0; 
+  int index3 = 0;
+  int plevel = 1;
   struct proc *procToRun;
   NOTFOUND:
   for (i = 0; i < NPROC ; i++)
@@ -426,7 +428,7 @@ struct prco* chooseProc() {
 void
 scheduler(void)
 {
-  struct proc *p, *temp;
+  struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
   for(;;){
