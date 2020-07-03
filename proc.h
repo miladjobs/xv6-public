@@ -51,6 +51,7 @@ struct proc {
   char name[16];               // Process name (debugging)
   int stime, etime, rtime, iotime; //use for waitx syscall
   int priority; //use for priority scheduling
+  int priorityLevel; //Process priorityLevel
 };
 
 // Process memory is laid out contiguously, low addresses first:

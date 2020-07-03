@@ -370,6 +370,50 @@ waitx(int *wtime, int *rtime)
   
 }
 
+struct prco* chooseProc() {
+  int i;
+  int index1, index2, index3;
+  int plevel;
+  struct proc *procToRun;
+  NOTFOUND:
+  for (i = 0; i < NPROC ; i++)
+  {
+    switch (plevel)
+    {
+    case 1:
+      procToRun = &ptable.proc[(index1 + i) % NPROC];
+      if (procToRun -> state == RUNNABLE && procToRun->priorityLevel == plevel)
+      {
+        index1 = (index1 + 1 + i) % NPROC;
+        return procToRun;
+      }
+    case 2:
+        procToRun = &ptable.proc[(index2 + i) % NPROC];
+        if (procToRun->state == RUNNABLE && procToRun->priorityLevel == plevel)
+        {
+          index2 = (index2 + 1 + i) % NPROC;
+          return procToRun;
+        }
+        
+    case 3:
+        procToRun = &ptable.proc[(index3 + i) % NPROC];
+        if (procToRun->state == RUNNABLE && procToRun->priorityLevel == plevel)
+        {
+          index3 = (index3 + 1 + i) % NPROC;
+          return procToRun;
+        }
+    }
+  }
+  if (plevel == 3)
+    return 0;
+  else
+  {
+    plevel ++;
+    goto NOTFOUND;
+  }
+  return 0;
+}
+
 
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
@@ -385,27 +429,27 @@ scheduler(void)
   struct proc *p, *temp;
   struct cpu *c = mycpu();
   c->proc = 0;
-  
   for(;;){
     // Enable interrupts on this processor.
     sti();
 
     // Loop over process table looking for process to run.
-    struct proc *HP; //varibale for store high priority
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
-      //add priority scheduling
-      HP = p;
-      for (temp = ptable.proc; temp < &ptable.proc[NPROC]; temp++)
+      //add MLQ scheduling
+      struct proc* process = chooseProc();
+      if (process != 0)
       {
-        if (temp->state != RUNNABLE)
-          continue;
-        if(HP->priority > temp->priority)
-          HP = temp;  
+        p = process;
       }
-      p = HP; //process with high priority
+      else
+        if(p->state != RUNNABLE)
+          continue;
+      
+      
+      
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
@@ -618,6 +662,7 @@ set_priority(int pid, int value){
     }
   }
   release(&ptable.lock);
+  yield();
   return old_priority;
 }
 
@@ -627,19 +672,38 @@ xps(void){
   struct proc *p;
   sti();
   acquire(&ptable.lock);
-  cprintf("name \t  pid  \t  state  \t priority \n");
+  cprintf("name \t  pid  \t  state  \t priority \t level \n");
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
     if (p->state == SLEEPING)
-      cprintf("%s \t  %d \t  SLEEPING  \t %d \n");
+      cprintf("%s \t  %d \t  SLEEPING  \t %d  \t %d \n", p->name, p->pid, p->priority, p->priorityLevel);
     else if(p->state == RUNNING)
-        cprintf("%s \t  %d \t  RUNNING  \t %d \n");
+      cprintf("%s \t  %d \t  RUNNING  \t %d  \t %d \n", p->name, p->pid, p->priority, p->priorityLevel);
     else if(p->state == RUNNABLE)
-        cprintf("%s \t  %d \t  RUNNABLE  \t %d \n");
+      cprintf("%s \t  %d \t  RUNNABLE  \t %d  \t %d \n", p->name, p->pid, p->priority, p->priorityLevel);
     else if(p->state == ZOMBIE)
-        cprintf("%s \t  %d \t  ZOMBIE  \t %d \n");        
+      cprintf("%s \t  %d \t  ZOMBIE  \t %d  \t %d \n", p->name, p->pid, p->priority, p->priorityLevel);        
   }
   release(&ptable.lock);
 
   return 22;
+}
+
+//nice function which nice syscall use
+int
+nice(int pid, int priority)
+{
+  struct proc *p;
+  acquire(&ptable.lock);
+  for(p=ptable.proc; p<&ptable.proc[NPROC]; p++){
+    if (p->pid == pid)
+    {
+      p->priorityLevel = priority;
+      break;
+    }
+    
+  }
+  release(&ptable.lock);
+  yield();
+  return 0;
 }
